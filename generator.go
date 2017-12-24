@@ -1,13 +1,12 @@
 package trapi2raml
 
 import (
-	"io"
-
 	"fmt"
-	"github.com/RangelReale/trapi"
+	"io"
 	"path"
-	"sort"
 	"strings"
+
+	"github.com/RangelReale/trapi"
 )
 
 type Generator struct {
@@ -26,18 +25,26 @@ func (g *Generator) Generate(parser *trapi.Parser, out io.Writer) error {
 	ww.writeLine(0, "types:")
 
 	// sort datatype map keys
-	dtkeys := make([]string, 0)
-	for dtk, _ := range parser.DataTypes {
-		dtkeys = append(dtkeys, dtk)
-	}
-	sort.Strings(dtkeys)
-
-	for _, dtk := range dtkeys {
-		dt := parser.DataTypes[dtk]
-		if !dt.BuiltIn {
-			ww.writeLine(1, fmt.Sprintf("%s:", dtk))
-			ww.writeType(1, dt)
+	/*
+		dtkeys := make([]string, 0)
+		for dtk, _ := range parser.DataTypes {
+			dtkeys = append(dtkeys, dtk)
 		}
+		sort.Strings(dtkeys)
+
+		for _, dtk := range dtkeys {
+			dt := parser.DataTypes[dtk]
+			if !dt.BuiltIn {
+				ww.writeLine(1, fmt.Sprintf("%s:", dtk))
+				ww.writeType(1, dt)
+			}
+		}
+	*/
+
+	// api defines
+	for _, def := range parser.ApiDefines {
+		ww.writeLine(1, fmt.Sprintf("%s:", def.Name))
+		ww.writeType(1, def.DataType)
 	}
 
 	// apis

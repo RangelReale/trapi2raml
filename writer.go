@@ -69,7 +69,11 @@ func (w *wrapWriter) writeTypeInternal(ident int, dt *trapi.ApiDataType, isroot 
 			w.writeLine(ident, fmt.Sprintf("%s:", dt.Name))
 		}
 	*/
-	w.writeLine(ident+1, fmt.Sprintf("type: %s", TRType(dt.DataType)))
+	if dt.BuiltIn || dt.DataTypeName == "" {
+		w.writeLine(ident+1, fmt.Sprintf("type: %s", TRType(dt.DataType)))
+	} else {
+		w.writeLine(ident+1, fmt.Sprintf("type: %s", dt.DataTypeName))
+	}
 	w.writeLine(ident+1, fmt.Sprintf("debugtype: %s", spew.Sdump(dt)))
 	if dt.Description != "" {
 		w.writeLine(ident+1, fmt.Sprintf("description: %s", dt.Description))
