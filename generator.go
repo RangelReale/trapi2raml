@@ -35,7 +35,7 @@ func (g *Generator) Generate(parser *trapi.Parser, out io.Writer) error {
 	for _, dtk := range dtkeys {
 		dt := parser.DataTypes[dtk]
 		if !dt.BuiltIn {
-			ww.writeLine(1, fmt.Sprintf("%s:", dt.Name))
+			ww.writeLine(1, fmt.Sprintf("%s:", dtk))
 			ww.writeType(1, dt)
 		}
 	}

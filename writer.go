@@ -64,9 +64,11 @@ func (w *wrapWriter) writeType(ident int, dt *trapi.ApiDataType) {
 
 func (w *wrapWriter) writeTypeInternal(ident int, dt *trapi.ApiDataType, isroot bool) {
 
-	if !isroot {
-		w.writeLine(ident, fmt.Sprintf("%s:", dt.Name))
-	}
+	/*
+		if !isroot {
+			w.writeLine(ident, fmt.Sprintf("%s:", dt.Name))
+		}
+	*/
 	w.writeLine(ident+1, fmt.Sprintf("type: %s", TRType(dt.DataType)))
 	w.writeLine(ident+1, fmt.Sprintf("debugtype: %s", spew.Sdump(dt)))
 	if dt.Description != "" {
@@ -78,6 +80,7 @@ func (w *wrapWriter) writeTypeInternal(ident int, dt *trapi.ApiDataType, isroot 
 	if dt.DataType == trapi.DATATYPE_OBJECT && dt.Items != nil {
 		w.writeLine(ident+1, "properties:")
 		for _, iord := range dt.ItemsOrder {
+			w.writeLine(ident+2, fmt.Sprintf("%s:", iord))
 			w.writeTypeInternal(ident+2, dt.Items[iord], false)
 		}
 	}
