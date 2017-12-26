@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/RangelReale/trapi"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type wrapWriter struct {
@@ -59,33 +58,36 @@ func (w *wrapWriter) writeLineMultiline(ident int, text string) {
 }
 
 func (w *wrapWriter) writeType(ident int, dt *trapi.ApiDataType) {
-	w.writeTypeInternal(ident, dt, true)
+	w.writeTypeInternal(ident, dt, true, false, false)
 }
 
-func (w *wrapWriter) writeTypeInternal(ident int, dt *trapi.ApiDataType, isroot bool) {
+func (w *wrapWriter) writeTypeDefine(ident int, dt *trapi.ApiDataType) {
+	w.writeTypeInternal(ident, dt, true, false, true)
+}
+
+func (w *wrapWriter) writeTypeInternal(ident int, dt *trapi.ApiDataType, is_root bool, is_required bool, is_define bool) {
 
 	/*
 		if !isroot {
 			w.writeLine(ident, fmt.Sprintf("%s:", dt.Name))
 		}
 	*/
-	if dt.BuiltIn || dt.DataTypeName == "" {
+	if dt.BuiltIn || dt.DataTypeName == "" || is_define {
 		w.writeLine(ident+1, fmt.Sprintf("type: %s", TRType(dt.DataType)))
 	} else {
 		w.writeLine(ident+1, fmt.Sprintf("type: %s", dt.DataTypeName))
 	}
-	w.writeLine(ident+1, fmt.Sprintf("debugtype: %s", spew.Sdump(dt)))
 	if dt.Description != "" {
 		w.writeLine(ident+1, fmt.Sprintf("description: %s", dt.Description))
 	}
-	if !isroot && !dt.Required {
+	if !is_root && !is_required {
 		w.writeLine(ident+1, "required: false")
 	}
 	if dt.DataType == trapi.DATATYPE_OBJECT && dt.Items != nil {
 		w.writeLine(ident+1, "properties:")
 		for _, iord := range dt.ItemsOrder {
-			w.writeLine(ident+2, fmt.Sprintf("%s:", iord))
-			w.writeTypeInternal(ident+2, dt.Items[iord], false)
+			w.writeLine(ident+2, fmt.Sprintf("%s:", dt.Items[iord].FieldName))
+			w.writeTypeInternal(ident+2, dt.Items[iord].ApiDataType, false, dt.Items[iord].Required, false)
 		}
 	}
 	if dt.Examples != nil && len(dt.Examples) > 0 {

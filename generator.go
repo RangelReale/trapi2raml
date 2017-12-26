@@ -44,7 +44,7 @@ func (g *Generator) Generate(parser *trapi.Parser, out io.Writer) error {
 	// api defines
 	for _, def := range parser.ApiDefines {
 		ww.writeLine(1, fmt.Sprintf("%s:", def.Name))
-		ww.writeType(1, def.DataType)
+		ww.writeTypeDefine(1, def.DataType)
 	}
 
 	// apis
