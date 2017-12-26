@@ -3,8 +3,6 @@ package trapi2ramlgen
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
-	"fmt"
 	"strings"
 	"unicode"
 )
@@ -40,20 +38,23 @@ func (w *wrapWriter) unidentText(text string) string {
 }
 
 func (w *wrapWriter) unidentTypedText(contenttype string, text string) string {
-	if contenttype == "json" || contenttype == "application/json" {
-		var jdata interface{}
-		err := json.Unmarshal([]byte(text), &jdata)
-		if err == nil {
-			ret, err := json.MarshalIndent(jdata, "", "    ")
+	// this changes key order, they should be kept in the same source order
+	/*
+		if contenttype == "json" || contenttype == "application/json" {
+			var jdata interface{}
+			err := json.Unmarshal([]byte(text), &jdata)
 			if err == nil {
-				return string(ret)
+				ret, err := json.MarshalIndent(jdata, "", "    ")
+				if err == nil {
+					return string(ret)
+				} else {
+					w.warnings = append(w.warnings, NewErrWarning(fmt.Sprintf("Could not parse json: %v [%s]\n", err, text)))
+				}
 			} else {
 				w.warnings = append(w.warnings, NewErrWarning(fmt.Sprintf("Could not parse json: %v [%s]\n", err, text)))
 			}
-		} else {
-			w.warnings = append(w.warnings, NewErrWarning(fmt.Sprintf("Could not parse json: %v [%s]\n", err, text)))
 		}
-	}
+	*/
 	// fallback
 	return w.unidentText(text)
 }

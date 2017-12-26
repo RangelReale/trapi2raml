@@ -69,5 +69,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// warnings
+	if gen.Warnings != nil && len(gen.Warnings) > 0 {
+		for _, w := range gen.Warnings {
+			fmt.Printf("WARNING: %v\n", w)
+		}
+	}
+
 	fmt.Printf("File %s generated successfully\n", dstFile)
 }
