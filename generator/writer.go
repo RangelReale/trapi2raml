@@ -13,6 +13,8 @@ type wrapWriter struct {
 	writer   io.Writer
 	err      error
 	replacer *strings.Replacer
+
+	warnings []error
 }
 
 func newWrapWriter(writer io.Writer) *wrapWriter {
@@ -90,15 +92,50 @@ func (w *wrapWriter) writeTypeInternal(ident int, dt *trapi.ApiDataType, is_root
 			w.writeTypeInternal(ident+2, dt.Items[iord].ApiDataType, false, dt.Items[iord].Required, false)
 		}
 	}
-	if dt.Examples != nil && len(dt.Examples) > 0 {
-		if len(dt.Examples) == 1 {
-			w.writeLine(ident+1, "example:")
-			w.writeLineMultiline(ident+2, unidentText(dt.Examples[0].Text))
+	w.writeExamples(ident+1, dt.Examples)
+	/*
+		if dt.Examples != nil && len(dt.Examples) > 0 {
+			if len(dt.Examples) == 1 {
+				w.writeLine(ident+1, "example:")
+				w.writeLineMultiline(ident+2, unidentText(dt.Examples[0].Text))
+			} else {
+				w.writeLine(ident+1, "examples:")
+				for ect, e := range dt.Examples {
+					w.writeLine(ident+2, fmt.Sprintf("example%d: |", ect))
+					w.writeLineMultiline(ident+3, unidentText(e.Text))
+				}
+			}
+		}
+	*/
+}
+
+func (w *wrapWriter) writeHeaders(ident int, hl *trapi.ApiHeaderList) {
+
+	if hl.List != nil && len(hl.List) > 0 {
+		for _, qheadname := range hl.Order {
+			qhead := hl.List[qheadname]
+			if len(qhead) > 0 {
+				w.writeLine(ident, fmt.Sprintf("%s:", qheadname))
+				if qhead[0].Description != "" {
+					w.writeLine(ident+1, fmt.Sprintf("description: %s", qhead[0].Description))
+				}
+				w.writeTypeInternal(ident, qhead[0].DataType, true, false, true)
+			}
+		}
+	}
+
+}
+
+func (w *wrapWriter) writeExamples(ident int, ex []*trapi.ApiExample) {
+	if ex != nil && len(ex) > 0 {
+		if len(ex) == 1 {
+			w.writeLine(ident, "example:")
+			w.writeLineMultiline(ident+1, w.unidentTypedText(ex[0].ContentType, ex[0].Text))
 		} else {
-			w.writeLine(ident+1, "examples:")
-			for ect, e := range dt.Examples {
-				w.writeLine(ident+2, fmt.Sprintf("example%d: |", ect))
-				w.writeLineMultiline(ident+3, unidentText(e.Text))
+			w.writeLine(ident, "examples:")
+			for ect, e := range ex {
+				w.writeLine(ident+1, fmt.Sprintf("example%d: |", ect))
+				w.writeLineMultiline(ident+2, w.unidentTypedText(e.ContentType, e.Text))
 			}
 		}
 	}
