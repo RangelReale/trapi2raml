@@ -1,4 +1,4 @@
-package trapi2raml
+package trapi2ramlgen
 
 import (
 	"github.com/RangelReale/trapi"

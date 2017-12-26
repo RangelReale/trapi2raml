@@ -1,4 +1,4 @@
-package trapi2raml
+package trapi2ramlgen
 
 import (
 	"fmt"
@@ -49,7 +49,6 @@ func (g *Generator) Generate(parser *trapi.Parser, out io.Writer) error {
 
 	// apis
 	apilist := parser.BuildApiList()
-	fmt.Printf("%+v\n", apilist)
 	g.writeApi(ww, 0, "", apilist)
 
 	return nil
