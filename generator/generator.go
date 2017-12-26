@@ -116,6 +116,21 @@ func (g *Generator) writeApi(ww *wrapWriter, ident int, curpath string, apilist 
 
 		}
 
+		// request body params
+		if qparams, ok := api.Params[trapi.PARAMTYPE_BODY]; ok {
+			if len(qparams.List) > 1 {
+				return fmt.Errorf("More than one request body on api '%s %s'", api.Method, apipath)
+			}
+			ww.writeLine(ident+2, "body:")
+			for _, po := range qparams.Order {
+				p := qparams.List[po]
+				ww.writeType(ident+3, p.DataType)
+				if p.Examples != nil && len(p.Examples) > 0 {
+					ww.writeExamples(ident+4, p.Examples)
+				}
+			}
+		}
+
 		if api.Responses != nil && len(api.Responses.List) > 0 {
 			//
 			// responses
@@ -129,8 +144,12 @@ func (g *Generator) writeApi(ww *wrapWriter, ident int, curpath string, apilist 
 			sort.Strings(qcodelist)
 			for _, qcode := range qcodelist {
 				qrespbodylist := api.Responses.List[qcode]
+				// response code
 				ww.writeLine(ident+3, fmt.Sprintf("%s:", qcode))
 				if len(qrespbodylist) > 0 {
+					if len(qrespbodylist) > 0 && qrespbodylist[0].ApiResponse.DataType.Description != "" {
+						ww.writeLine(ident+4, fmt.Sprintf("description: %s", qrespbodylist[0].ApiResponse.DataType.Description))
+					}
 					ww.writeLine(ident+4, "body:")
 					check_repeat := make(map[string]bool)
 					for _, qrespbody := range qrespbodylist {
