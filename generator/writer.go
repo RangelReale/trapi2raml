@@ -75,10 +75,9 @@ func (w *wrapWriter) writeTypeInternal(ident int, dt *trapi.ApiDataType, is_root
 		}
 	*/
 	if dt.BuiltIn || dt.DataTypeName == "" || is_define {
+		w.writeLine(ident+1, fmt.Sprintf("type: %s", TRType(dt.DataType)))
 		if dt.DataType == trapi.DATATYPE_ARRAY && dt.ItemType != nil && *dt.ItemType != "" {
-			w.writeLine(ident+1, fmt.Sprintf("type: %s[]", *dt.ItemType))
-		} else {
-			w.writeLine(ident+1, fmt.Sprintf("type: %s", TRType(dt.DataType)))
+			w.writeLine(ident+1, fmt.Sprintf("items: %s", *dt.ItemType))
 		}
 	} else {
 		w.writeLine(ident+1, fmt.Sprintf("type: %s", dt.DataTypeName))
