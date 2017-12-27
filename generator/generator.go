@@ -124,9 +124,15 @@ func (g *Generator) writeApi(ww *wrapWriter, ident int, curpath string, apilist 
 			ww.writeLine(ident+2, "body:")
 			for _, po := range qparams.Order {
 				p := qparams.List[po]
-				ww.writeType(ident+3, p.DataType)
+				newident := ident + 3
+				// use "name" as content-type for body params
+				if p.Name != "-" {
+					ww.writeLine(newident, fmt.Sprintf("%s:", p.Name))
+					newident++
+				}
+				ww.writeType(newident, p.DataType)
 				if p.Examples != nil && len(p.Examples) > 0 {
-					ww.writeExamples(ident+4, p.Examples)
+					ww.writeExamples(newident+1, p.Examples)
 				}
 			}
 		}
