@@ -133,12 +133,12 @@ func (w *wrapWriter) writeExamples(ident int, ex []*trapi.ApiExample) {
 	if ex != nil && len(ex) > 0 {
 		if len(ex) == 1 {
 			w.writeLine(ident, "example:")
-			w.writeLineMultiline(ident+1, w.unidentTypedText(ex[0].ContentType, ex[0].Text))
+			w.writeLineMultiline(ident+1, w.unidentTypedText(ex[0].ContentType, ex[0].Text, &ex[0].SPIB_Filename))
 		} else {
 			w.writeLine(ident, "examples:")
 			for ect, e := range ex {
 				w.writeLine(ident+1, fmt.Sprintf("example%d: |", ect))
-				w.writeLineMultiline(ident+2, w.unidentTypedText(e.ContentType, e.Text))
+				w.writeLineMultiline(ident+2, w.unidentTypedText(e.ContentType, e.Text, &e.SPIB_Filename))
 			}
 		}
 	}
