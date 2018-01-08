@@ -9,9 +9,12 @@ import (
 	"github.com/RangelReale/gocompar/clike"
 	"github.com/RangelReale/trapi"
 	"github.com/RangelReale/trapi2raml/generator"
+	"strings"
 )
 
-// trapi2raml <source-code-path> <output-filename.raml>
+var tags = flag.String("tags", "", "Filter tags")
+
+// trapi2raml <source-code-path>... <output-filename.raml>
 func main() {
 
 	flag.Usage = func() {
@@ -22,6 +25,7 @@ func main() {
 
 	flag.Parse()
 
+
 	// parse parameters
 	if len(flag.Args()) < 2 {
 		fmt.Fprint(os.Stderr, "Invalid number of parameters\n")
@@ -29,15 +33,33 @@ func main() {
 		os.Exit(1)
 	}
 
-	srcPath := flag.Arg(0)
-	dstFile := flag.Arg(1)
+	dstFile := flag.Arg(flag.NArg()-1)
 
-	if fi, err := os.Stat(srcPath); err != nil {
-		fmt.Fprint(os.Stderr, "Error opening source path: %v\n", err)
-		os.Exit(1)
-	} else if !fi.IsDir() {
-		fmt.Fprint(os.Stderr, "Source path is not a directory: %s\n", srcPath)
-		os.Exit(1)
+	// create c-like comments parser
+	clike_parser := gocompar.NewParser(gcp_clike.NewParser(), &gcp_clike.Filter_Golang{})
+
+	// create trapi parser
+	parser := trapi.NewParser(clike_parser)
+
+	if tags != nil && *tags != "" {
+		for _, t := range strings.Split(*tags, ",") {
+			fmt.Printf("Tag: %s\n", t)
+			parser.AddTag(t)
+		}
+	}
+
+	// parse requested directories
+	for si := 0; si < flag.NArg()-1; si++ {
+		srcPath := flag.Arg(si)
+		if fi, err := os.Stat(srcPath); err != nil {
+			fmt.Fprintf(os.Stderr, "Error opening source path: %v\n", err)
+			os.Exit(1)
+		} else if !fi.IsDir() {
+			fmt.Fprintf(os.Stderr, "Source path is not a directory: %s\n", srcPath)
+			os.Exit(1)
+		}
+
+		parser.AddDir(srcPath)
 	}
 
 	// create output file
@@ -47,17 +69,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	// create c-like comments parser
-	clike_parser := gocompar.NewParser(gcp_clike.NewParser(), &gcp_clike.Filter_Golang{})
-
-	// create trapi parser
-	parser := trapi.NewParser(clike_parser)
-
-	// parse requested directory
-	parser.AddDir(srcPath)
 	err = parser.Parse()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error parsing source code directory %s: %v\n", srcPath, err)
+		fmt.Fprintf(os.Stderr, "Error parsing source code directories: %v\n", err)
 		os.Exit(1)
 	}
 
